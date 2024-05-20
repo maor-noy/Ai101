@@ -3,14 +3,14 @@ import state
 import frontier
 
 
-def search(n, start):
+def search(start):
     """
     function to search for the target state
     :param n: the size of the board
     :param start: the start state
     :return: the path to the target state
     """
-    s = state.create(n, start)
+    s = state.create(start)
     f = frontier.create(s)
     while not frontier.is_empty(f):
         s = frontier.remove(f)

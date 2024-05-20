@@ -1,5 +1,33 @@
 import pygame
 import search  # Ensure your `search` module is correctly implemented and available.
+import random
+
+
+def shuffle(start, zero_index):
+    """
+    Shuffles the puzzle by executing 100 random moves.
+
+    Args:
+        start (list): The current state of the puzzle.
+        zero_index (int): The current position of the zero tile.
+
+    return: The new position of the zero tile.
+    """
+    zero_index = start.index(0)
+    directions = ['<', '>', '^', 'v']
+    for _ in range(100):
+        valid_moves = []
+        if zero_index % 3 != 0:
+            valid_moves.append('<')
+        if zero_index % 3 != 2:
+            valid_moves.append('>')
+        if zero_index >= 3:
+            valid_moves.append('^')
+        if zero_index < 6:
+            valid_moves.append('v')
+        move = random.choice(valid_moves)
+        zero_index = do_move(start, zero_index, move)
+    return zero_index
 
 
 def do_move(start, zero_index, move):
@@ -9,62 +37,37 @@ def do_move(start, zero_index, move):
     Args:
         start (list): The current state of the puzzle.
         zero_index (int): The current position of the zero tile.
-        move (str): The move to be executed ('<', '>', '^', 'v').
+        move (str): The move to be executed ('<', '>', '^', 'v', 'left', 'right', 'up', 'down').
 
     Returns:
         int: The new position of the zero tile.
     """
-    if move == "<":
+    if move == "<" and zero_index % 3 != 0:
         start[zero_index], start[zero_index - 1] = start[zero_index - 1], start[zero_index]
         zero_index -= 1
-    elif move == ">":
+    elif move == ">" and zero_index % 3 != 2:
         start[zero_index], start[zero_index + 1] = start[zero_index + 1], start[zero_index]
         zero_index += 1
-    elif move == "^":
+    elif move == "^" and zero_index >= 3:
         start[zero_index], start[zero_index - 3] = start[zero_index - 3], start[zero_index]
         zero_index -= 3
-    elif move == "v":
+    elif move == "v" and zero_index < 6:
         start[zero_index], start[zero_index + 3] = start[zero_index + 3], start[zero_index]
         zero_index += 3
     return zero_index
 
-def swap(start, zero_index, move):
-    """
-    Swaps the zero tile with an adjacent tile based on the input move.
-
-    Args:
-        start (list): The current state of the puzzle.
-        zero_index (int): The current position of the zero tile.
-        move (str): The move to be executed ('left', 'right', 'up', 'down').
-
-    Returns:
-        int: The new position of the zero tile.
-    """
-    if move == "left" and zero_index % 3 != 0:
-        start[zero_index], start[zero_index - 1] = start[zero_index - 1], start[zero_index]
-        zero_index -= 1
-    elif move == "right" and zero_index % 3 != 2:
-        start[zero_index], start[zero_index + 1] = start[zero_index + 1], start[zero_index]
-        zero_index += 1
-    elif move == "up" and zero_index >= 3:
-        start[zero_index], start[zero_index - 3] = start[zero_index - 3], start[zero_index]
-        zero_index -= 3
-    elif move == "down" and zero_index < 6:
-        start[zero_index], start[zero_index + 3] = start[zero_index + 3], start[zero_index]
-        zero_index += 3
-    return zero_index
 
 def main():
     """
     Main function to run the 8-puzzle game using Pygame.
     """
     # Initial state setup
-    start = [0, 1, 2, 3, 4, 5, 6, 7, 8]  # Example starting state
+    start = list(range(9))
     zero_index = start.index(0)
     colors = ["white", "green", "blue", "yellow", "purple", "orange", "pink", "brown", "gray"]
     solution = ""
     solve = False
-    count = 0
+    count = 0  # Counter to keep track of the moves in the solution
 
     # Initialize pygame
     pygame.init()
@@ -74,7 +77,10 @@ def main():
 
     font = pygame.font.Font(None, 36)
     solve_text = font.render("Solve", True, "black")
-    solve_rect = solve_text.get_rect(center=(150, 350))
+    solve_rect = solve_text.get_rect(center=(150, 370))
+
+    shuffle_text = font.render("Shuffle", True, "black")
+    shuffle_rect = shuffle_text.get_rect(center=(150, 320))
 
     # Create rectangles for the 3x3 grid
     rects = [pygame.Rect(j * 100, i * 100, 100, 100) for i in range(3) for j in range(3)]
@@ -83,25 +89,32 @@ def main():
 
     while running:
         for event in pygame.event.get():
+            # Check if the user has clicked the close button
             if event.type == pygame.QUIT:
                 running = False
+
+            # Check if the user has clicked the solve button
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if solve_rect.collidepoint(x, y):
                     solve = True
-                    solution = search.search(3, start)  # Assumes search.search returns a solution path
+                    solution = search.search(start)
+                elif shuffle_rect.collidepoint(x, y):
+                    zero_index = shuffle(start, zero_index)
+
+            # Check if the user has pressed any key to move the tiles
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    zero_index = swap(start, zero_index, "left")
+                    zero_index = do_move(start, zero_index, "<")
                 elif event.key == pygame.K_RIGHT:
-                    zero_index = swap(start, zero_index, "right")
+                    zero_index = do_move(start, zero_index, ">")
                 elif event.key == pygame.K_UP:
-                    zero_index = swap(start, zero_index, "up")
+                    zero_index = do_move(start, zero_index, "^")
                 elif event.key == pygame.K_DOWN:
-                    zero_index = swap(start, zero_index, "down")
+                    zero_index = do_move(start, zero_index, "v")
 
-        screen.fill("white")
         screen.blit(solve_text, solve_rect)
+        screen.blit(shuffle_text, shuffle_rect)
 
         # Render the puzzle grid with current state
         for i, r in enumerate(rects):

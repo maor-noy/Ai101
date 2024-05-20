@@ -21,9 +21,8 @@ def get_next(x):
 
 
 # returns a random board nXn
-def create(n, start):
+def create(start):
     s = start
-    m = "<>v^"
     return [s, ""]
 
 
