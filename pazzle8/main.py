@@ -1,60 +1,33 @@
 import pygame
 import search  # Ensure your `search` module is correctly implemented and available.
+from state import if_legal
 import random
 
 
-def shuffle(start, zero_index):
+def shuffle_puzzle(puzzle):
     """
     Shuffles the puzzle by executing 100 random moves.
 
     Args:
-        start (list): The current state of the puzzle.
-        zero_index (int): The current position of the zero tile.
-
-    return: The new position of the zero tile.
-    """
-    zero_index = start.index(0)
-    directions = ['<', '>', '^', 'v']
-    for _ in range(100):
-        valid_moves = []
-        if zero_index % 3 != 0:
-            valid_moves.append('<')
-        if zero_index % 3 != 2:
-            valid_moves.append('>')
-        if zero_index >= 3:
-            valid_moves.append('^')
-        if zero_index < 6:
-            valid_moves.append('v')
-        move = random.choice(valid_moves)
-        zero_index = do_move(start, zero_index, move)
-    return zero_index
-
-
-def do_move(start, zero_index, move):
-    """
-    Executes a move by swapping the zero tile with an adjacent tile.
-
-    Args:
-        start (list): The current state of the puzzle.
-        zero_index (int): The current position of the zero tile.
-        move (str): The move to be executed ('<', '>', '^', 'v', 'left', 'right', 'up', 'down').
+        puzzle (list): The current state of the puzzle.
+        zero_pos (int): The current position of the zero tile.
 
     Returns:
         int: The new position of the zero tile.
     """
-    if move == "<" and zero_index % 3 != 0:
-        start[zero_index], start[zero_index - 1] = start[zero_index - 1], start[zero_index]
-        zero_index -= 1
-    elif move == ">" and zero_index % 3 != 2:
-        start[zero_index], start[zero_index + 1] = start[zero_index + 1], start[zero_index]
-        zero_index += 1
-    elif move == "^" and zero_index >= 3:
-        start[zero_index], start[zero_index - 3] = start[zero_index - 3], start[zero_index]
-        zero_index -= 3
-    elif move == "v" and zero_index < 6:
-        start[zero_index], start[zero_index + 3] = start[zero_index + 3], start[zero_index]
-        zero_index += 3
-    return zero_index
+    zero_pos = puzzle.index(0)
+    for _ in range(100):
+        valid_moves = []
+        if zero_pos % 3 != 0:
+            valid_moves.append('<')
+        if zero_pos % 3 != 2:
+            valid_moves.append('>')
+        if zero_pos >= 3:
+            valid_moves.append('^')
+        if zero_pos < 6:
+            valid_moves.append('v')
+        move = random.choice(valid_moves)
+        if_legal(puzzle, move)
 
 
 def main():
@@ -62,12 +35,12 @@ def main():
     Main function to run the 8-puzzle game using Pygame.
     """
     # Initial state setup
-    start = list(range(9))
-    zero_index = start.index(0)
-    colors = ["white", "green", "blue", "yellow", "purple", "orange", "pink", "brown", "gray"]
-    solution = ""
-    solve = False
-    count = 0  # Counter to keep track of the moves in the solution
+    puzzle = list(range(9))
+    zero_pos = puzzle.index(0)
+    tile_colors = ["white", "green", "blue", "yellow", "purple", "orange", "pink", "brown", "gray"]
+    solution_moves = ""
+    solving = False
+    move_count = 0  # Counter to keep track of the moves in the solution
 
     # Initialize pygame
     pygame.init()
@@ -83,7 +56,7 @@ def main():
     shuffle_rect = shuffle_text.get_rect(center=(150, 320))
 
     # Create rectangles for the 3x3 grid
-    rects = [pygame.Rect(j * 100, i * 100, 100, 100) for i in range(3) for j in range(3)]
+    tile_rects = [pygame.Rect(j * 100, i * 100, 100, 100) for i in range(3) for j in range(3)]
     clock = pygame.time.Clock()
     running = True
 
@@ -97,43 +70,43 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if solve_rect.collidepoint(x, y):
-                    solve = True
-                    solution = search.search(start)
+                    solving = True
+                    solution_moves = search.search(puzzle)
                 elif shuffle_rect.collidepoint(x, y):
-                    zero_index = shuffle(start, zero_index)
+                    shuffle_puzzle(puzzle)
 
             # Check if the user has pressed any key to move the tiles
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN and not solving:
                 if event.key == pygame.K_LEFT:
-                    zero_index = do_move(start, zero_index, "<")
+                    if_legal(puzzle, "<")
                 elif event.key == pygame.K_RIGHT:
-                    zero_index = do_move(start, zero_index, ">")
+                    if_legal(puzzle, ">")
                 elif event.key == pygame.K_UP:
-                    zero_index = do_move(start, zero_index, "^")
+                    if_legal(puzzle, "^")
                 elif event.key == pygame.K_DOWN:
-                    zero_index = do_move(start, zero_index, "v")
+                    if_legal(puzzle, "v")
 
         screen.blit(solve_text, solve_rect)
         screen.blit(shuffle_text, shuffle_rect)
 
         # Render the puzzle grid with current state
-        for i, r in enumerate(rects):
-            pygame.draw.rect(screen, colors[start[i]], r)
-            if start[i] != 0:
-                text = font.render(str(start[i]), True, "white")
-                text_rect = text.get_rect(center=r.center)
+        for i, rect in enumerate(tile_rects):
+            pygame.draw.rect(screen, tile_colors[puzzle[i]], rect)
+            if puzzle[i] != 0:
+                text = font.render(str(puzzle[i]), True, "white")
+                text_rect = text.get_rect(center=rect.center)
                 screen.blit(text, text_rect)
 
-        if solve:
-            if count < len(solution):
-                zero_index = do_move(start, zero_index, solution[count])
-                count += 1
+        if solving:
+            if move_count < len(solution_moves):
+                if_legal(puzzle, solution_moves[move_count])
+                move_count += 1
             else:
-                solve = False
-                count = 0
+                solving = False
+                move_count = 0
 
         pygame.display.flip()
-        clock.tick(5) if solve else clock.tick(30)
+        clock.tick(5) if solving else clock.tick(30)
 
     pygame.quit()
 
