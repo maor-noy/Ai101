@@ -84,7 +84,7 @@ def change_level(root, canvas, button_frame):
     level_window.title("Change Level")
     level_window.geometry("200x100")
 
-    scale = tk.Scale(level_window, from_=2, to=5, orient=tk.HORIZONTAL, label="Select Level")
+    scale = tk.Scale(level_window, from_=3, to=5, orient=tk.HORIZONTAL, label="Select Level")
     scale.pack(pady=10)
 
     set_button = tk.Button(level_window, text="Set Level", command=lambda: set_level(scale.get()))
@@ -138,7 +138,36 @@ def main():
     menu.add_cascade(label='File', menu=filemenu)
 
     helpmenu = tk.Menu(menu, tearoff=0)
-    helpmenu.add_command(label='About', command=lambda: messagebox.showinfo("About", "8-Puzzle Game"))
+    helpmenu.add_command(label='How to play', command=lambda: messagebox.showinfo("How to play", "Use the arrow keys "
+                                                                                                 "(Up, Down, Left, "
+                                                                                                 "Right) on your "
+                                                                                                 "keyboard to slide "
+                                                                                                 "the empty space "
+                                                                                                 "tile and rearrange "
+                                                                                                 "the numbered tiles. "
+                                                                                                 "Try to solve the "
+                                                                                                 "puzzle by arranging "
+                                                                                                 "the numbers in "
+                                                                                                 "ascending order."))
+
+    helpmenu.add_command(label='About', command=lambda: messagebox.showinfo("About", "The 8-Puzzle is a classic "
+                                                                                     "sliding tile puzzle. It "
+                                                                                     "consists of a square frame with "
+                                                                                     "8 numbered tiles and an empty "
+                                                                                     "space. The goal is to rearrange "
+                                                                                     "the tiles using the empty space "
+                                                                                     "to achieve a specific order, "
+                                                                                     "typically with numbers "
+                                                                                     "increasing left to right and "
+                                                                                     "top to bottom.  This refactored "
+                                                                                     "code provides a graphical user "
+                                                                                     "interface for the game, "
+                                                                                     "allowing you to shuffle the "
+                                                                                     "puzzle, solve it automatically, "
+                                                                                     "change the puzzle size, "
+                                                                                     "and potentially customize tile "
+                                                                                     "colors.  Use the arrow keys to "
+                                                                                     "move the tiles and have fun!"))
     menu.add_cascade(label='Help', menu=helpmenu)
 
     # Canvas setup
