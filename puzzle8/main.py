@@ -3,10 +3,17 @@ from tkinter import filedialog, messagebox
 import search  # Ensure your `search` module is correctly implemented and available.
 from state import if_legal  # Renamed for clarity
 import random
+from pygame import mixer
 
 
 N = 3  # Initial dimension of the puzzle (3x3)
 puzzle = list(range(N * N))  # Initial puzzle state
+
+
+def play_sound():
+
+    mixer.music.load("data/move_sound.mp3")
+    mixer.music.play()
 
 
 def shuffle_puzzle():
@@ -35,6 +42,7 @@ def get_valid_moves(zero_pos):
 def next_move(move_count, solution_moves):
     """Advances the solution by one move if available, otherwise stops solving."""
     if move_count < len(solution_moves):
+        play_sound()
         if_legal(puzzle, solution_moves[move_count])
         move_count += 1
     else:
@@ -56,6 +64,7 @@ def press_key(event):
     move = moves.get(key)
     if move:
         if_legal(puzzle, move)
+        play_sound()
 
 
 def import_photo():
@@ -92,6 +101,7 @@ def change_level(root, canvas, button_frame):
 
 
 def main():
+    mixer.init()# Initialize the mixer module for sound playback
     solution_moves = []
     solving = False
     move_count = 0
