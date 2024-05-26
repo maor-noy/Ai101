@@ -112,7 +112,8 @@ def change_level(root, canvas, button_frame):
         canvas.config(width=new_width, height=new_height)
         button_frame.place(relx=0.5, rely=(new_width + 20) / new_height, anchor=tk.CENTER)
         root.geometry(f"{new_width}x{new_height + 20}")  # Adjust the main window size
-        create_image_tiles()
+        if image_tiles:
+            create_image_tiles()
         root.update()
         level_window.destroy()
 
@@ -125,6 +126,7 @@ def change_level(root, canvas, button_frame):
 
     set_button = tk.Button(level_window, text="Set Level", command=lambda: set_level(scale.get()))
     set_button.pack(pady=5)
+
 
 def main():
     mixer.init()  # Initialize the mixer module for sound playback

@@ -35,8 +35,12 @@ def is_target(x):
     return x[0] == list(range(n))
 
 
-# def hdistance(s):
-#     return 0
+def hdistance(s):
+    c = 0
+    for i in range(1, len(s[0])):
+        if s[0].index(i) != i:
+            c += 1
+    return c
 
 
 #############################
@@ -55,3 +59,5 @@ def if_legal(x, m):
     elif z < n * n - n and m == "v":
         x[z] = x[z + n]
         x[z + n] = 0
+
+

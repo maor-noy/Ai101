@@ -1,36 +1,57 @@
-"""
-implements a queue
-[head, tail] - the first and last items on a linked list
-inserts to the tail and removes from the head
-every item is [value, next_item]
-"""
+import state
 
 
 def create(s):
-    p = [s, None]
-    return [p, p]
+    return [[s], 0, 0, 0]
 
 
 def is_empty(f):
-    return f[0] is None
+    return f[0] == []
 
 
-def insert(f, s):
+def val(s):
+    return state.hdistance(s)+state.path_len(s)
+
+# Uniform Cost: return state.path_len(s)
+# Greedy Best First: return state.hdistance(s)
+
+
+def insert(h, s):
     # inserts state s to the frontier
-    p = [s, None]  # New item
-    if is_empty(f):
-        f[0] = p  # The head points to the new item
-        f[1] = p  # The tail points to the new item
-    else:
-        f[1][1] = p  # Connects the last item to the new item
-        f[1] = p  # The tail points to the new item
+    f = h[0]
+    h[1] += 1
+    h[2] += 1
+    if h[2] > h[3]:
+        h[3] = h[2]
+    f.append(s)
+    i = len(f)-1
+    while i > 0 and val(f[i]) < val(f[(i-1)//2]):
+        t = f[i]
+        f[i] = f[(i-1)//2]
+        f[(i-1)//2] = t
+        i = (i-1)//2
 
 
-def remove(f):
-    if is_empty(f):
+def remove(h):
+    if is_empty(h):
         return 0
-    p = f[0][0]  # value of the item at the head of the queue
-    f[0] = f[0][1]  # Moves the head to the next item
-    if f[0] is None:  # If the head is None
-        f[1] = None  # the tail should also be None
-    return p
+    h[2] -= 1
+    f = h[0]
+    s = f[0]
+    f[0] = f[len(f)-1]
+    del f[-1]
+    heapify(f, 0)
+    return s
+
+
+def heapify(f, i):
+    minSon = i
+    if 2*i+1 < len(f) and val(f[2*i+1]) < val(f[minSon]):
+        minSon = 2*i+1
+    if 2*i+2 < len(f) and val(f[2*i+2]) < val(f[minSon]):
+        minSon = 2*i+2
+    if minSon != i:
+        t = f[minSon]
+        f[minSon] = f[i]
+        f[i] = t
+        heapify(f, minSon)
