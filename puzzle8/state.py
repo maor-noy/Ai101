@@ -5,8 +5,8 @@ The target is :
 345
 678
 """
-import random
 import math
+from numpy import sqrt
 
 
 def get_next(x):
@@ -36,10 +36,13 @@ def is_target(x):
 
 
 def hdistance(s):
+    n = sqrt(len(s[0]))
     c = 0
-    for i in range(1, len(s[0])):
-        if s[0].index(i) != i:
-            c += 1
+    for i in range(0, len(s[0])):  # manheten distance for each tile
+        index = s[0].index(i)
+        disX = abs(i % n - index % n)
+        disY = abs(i // n - index // n)
+        c += disX + disY
     return c
 
 
