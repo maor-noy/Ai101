@@ -83,4 +83,4 @@ def hill_climbing(size):
     printboard(b)
 
 
-hill_climbing(8)
+hill_climbing(15)

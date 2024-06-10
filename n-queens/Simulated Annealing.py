@@ -86,4 +86,4 @@ def simulated_annealing(n):
     printboard(current_board)
 
 
-simulated_annealing(8)
+simulated_annealing(15)

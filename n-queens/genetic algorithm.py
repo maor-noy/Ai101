@@ -16,14 +16,15 @@ def get_fitness(board):
     return count
 
 
-def generate_population(board_size):
+def generate_population(board_size, population_size):
     """
     Generates a population of random boards.
     :param board_size: size of the board
+    :param population_size: size of the population
     :return: a population of random boards
     """
     population = []
-    for _ in range(board_size):
+    for _ in range(population_size):
         population.append(rndboard(board_size))
     return population
 
@@ -82,21 +83,28 @@ def crossover(parent1, parent2):
     return child
 
 
-def genetic_algorithm(size, mutation_rate=0.1):
+def genetic_algorithm(size, population_size=100, mutation_rate=0.3):
     """
     Solve the n-queens problem using genetic algorithm.
     :param size: size of the board
+    :param population_size: size of the population
     :param mutation_rate: mutation rate
     :return: best board and the generation it was found
     """
-    population = generate_population(size)
+    population = generate_population(size, population_size)
     best_board = None
-    best_fitness = min([get_fitness(board) for board in population])
+    best_fitness = float('inf')
 
     while best_fitness != 0:
         fitnesses = [get_fitness(board) for board in population]
+        current_best_fitness = min(fitnesses)
+
+        if current_best_fitness < best_fitness:
+            best_fitness = current_best_fitness
+            best_board = population[fitnesses.index(best_fitness)]
+
         new_population = []
-        for _ in range(size):
+        for _ in range(population_size // 2):
             parent1, parent2 = select_parents(population, fitnesses)
             child1 = crossover(parent1, parent2)
             mutate(child1, mutation_rate)
@@ -105,28 +113,23 @@ def genetic_algorithm(size, mutation_rate=0.1):
             new_population.extend([child1, child2])
 
         population = new_population  # Ensure population size remains constant
-        fitnesses = [get_fitness(board) for board in population]
-        current_best_fitness = min(fitnesses)
-        if current_best_fitness < best_fitness:
-            best_fitness = current_best_fitness
-            best_board = population[fitnesses.index(current_best_fitness)]
 
     printboard(best_board)
+    return best_board, best_fitness
 
 
-def select_parents(population, fitness):
+def select_parents(population, fitnesses):
     """
     Select parents based on their fitness.
-    :param fitness:
     :param population: list of boards
-    :param fitness: list of fitness values corresponding to the boards
+    :param fitnesses: list of fitness values corresponding to the boards
     :return: two selected parent boards
     """
-    total_fitness = sum(fitness)
-    probabilities = [1 - (f / total_fitness) for f in fitness]
+    total_fitness = sum(fitnesses)
+    probabilities = [(total_fitness - f) / total_fitness for f in fitnesses]
     parents = random.choices(population, weights=probabilities, k=2)
     return parents
 
 
 # Example usage
-genetic_algorithm(8)
+genetic_algorithm(15)
