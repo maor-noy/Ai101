@@ -110,8 +110,7 @@ def run_algorithm(n, algorithm_name):
     """
     pygame.init()
     screen = pygame.display.set_mode((600, 600))
-    pygame.display.set_caption("N-Queens Visualization")
-    clock = pygame.time.Clock()
+    pygame.display.set_caption("N-Queens Visualization")uns
 
     algorithms = {
         "genetic_algorithm": genetic_algorithm,
