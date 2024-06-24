@@ -49,6 +49,7 @@ def select_parents(population, fitnesses):
     parents = random.choices(population, weights=probabilities, k=2)
     return parents
 
+
 def genetic_algorithm(size, population_size=100, mutation_rate=0.3):
     """
     Solve the n-queens problem using genetic algorithm.
@@ -63,25 +64,18 @@ def genetic_algorithm(size, population_size=100, mutation_rate=0.3):
     generation = 0
 
     while best_fitness != 0:
-        fitness = [threats(board) for board in population]
-        current_best_fitness = min(fitness)
-
-        if current_best_fitness < best_fitness:
-            best_fitness = current_best_fitness
-            best_board = population[fitness.index(best_fitness)]
-
+        fitnesses = [threats(board) for board in population]
         new_population = []
-        for _ in range(population_size // 2):
-            parent1, parent2 = select_parents(population, fitness)
-            child1 = crossover(parent1, parent2)
-            child2 = crossover(parent2, parent1)
-            mutate(child1, mutation_rate)
-            mutate(child2, mutation_rate)
-            new_population.extend([child1, child2])
+        for _ in range(population_size - 1):
+            parent1, parent2 = select_parents(population, fitnesses)
+            child = crossover(parent1, parent2)
+            child = mutate(child, mutation_rate)
+            new_population.append(child)
 
-        population = new_population  # Ensure population size remains constant
+        population = new_population
+        best_board = min(population, key=threats)
+        best_fitness = threats(best_board)
         generation += 1
-        yield min(population, key=threats)
+        yield best_board
 
     print(generation)
-    return best_board
